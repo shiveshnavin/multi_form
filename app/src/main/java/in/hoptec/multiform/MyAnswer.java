@@ -5,4 +5,13 @@ package in.hoptec.multiform;
  */
 
 public class MyAnswer {
+
+
+    public String question;
+    public String path;
+    public String answer;
+
+
+
+
 }

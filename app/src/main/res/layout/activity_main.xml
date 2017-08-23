@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="in.hoptec.multiform.MainActivity">
+
+    <TextView
+        android:id="@+id/ques"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+
+    </LinearLayout>
+
+    <Button
+        android:text="NEXT"
+        style="@android:style/Widget.Material.Button.Borderless.Colored"
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:targetApi="lollipop" />
+
+
+
+
+
+</LinearLayout>

@@ -9,7 +9,7 @@ public class MyAnswer {
 
     public String question;
     public String path;
-    public String answer;
+    public String answer="";
 
 
 

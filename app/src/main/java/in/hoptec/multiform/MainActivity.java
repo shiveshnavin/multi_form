@@ -7,7 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public static String TAG="SS";
     public static String URL="https://test-a0930.firebaseio.com/multiform";
 
+    boolean isReady=false;
     public int cur_step=0;
     ArrayList<MyAnswer> answers;
 
@@ -43,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
     DataSnapshot ds;
     DataSnapshot cursor;
     DataSnapshot pcursor;
+    ProgressBar prog;
+
+    int maxCount=6;
+    int curCount=1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         ques=(TextView)findViewById(R.id.ques);
         options=(LinearLayout)findViewById(R.id.options);
         next=(Button)findViewById(R.id.next);
+        prog=(ProgressBar)findViewById(R.id.prog);
+
+        maxCount=getIntent().getIntExtra("question_count",6);
+
 
         Firebase.setAndroidContext(this);
         fb=new Firebase(URL);
@@ -80,21 +92,55 @@ public class MainActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(!isReady)
+                {
+                    Toast.makeText(MainActivity.this,"Select An Option First !",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                double mx=maxCount;
+                double cx=curCount++;
+
+                double pr=100*(cx/mx) ;
+                Log.d(TAG, "onClick: prog"+pr+" cur  "+curCount+" max "+maxCount);
+
+                if(pr>90)
+                {
+                    //// TODO: Submit the form
+                    Toast.makeText(MainActivity.this,"Form Complete !",Toast.LENGTH_LONG).show();
+                    return;
+
+                }
+                prog.setProgress((int)pr);
                 if(cursor!=null)
                 {
 
                     MyAnswer ans=new MyAnswer();
-                    ans.answer=curo.name;
+
+                    final int childCount = options.getChildCount();
+                    for (int i = 0; i < childCount; i++) {
+
+                        CheckBox v =(CheckBox) options.getChildAt(i);
+
+                        if(v.isChecked())
+                        ans.answer+=v.getText().toString()+" | ";
+
+
+                    }
+
                     ans.question=ques.getText().toString();
                     ans.path=pcursor.getRef().getPath().toString();
                     answers.add(ans);
 
+                    int i=0;
                     for(MyAnswer answer:answers)
                     {
-                        Log.d(TAG, "onClick: QUES--- "+answer.question+" \nQUESTION--- "+answer.answer+"  \nPATH---  "+answer.path);
+                        Log.d(TAG, "My Answer No. : "+i+" \nQ :  "+answer.question+" \nAns(s) : "+answer.answer);
+                        i++;
                     }
 
                     inflate(cursor);
+                    isReady=false;
                 }
             }
         });
@@ -106,16 +152,17 @@ public class MainActivity extends AppCompatActivity {
     public void inflate(DataSnapshot cr)
     {
 
-        Log.d(TAG, "inflate:  "+cr.getValue().toString());
+       // Log.d(TAG, "inflate:  "+cr.getValue().toString());
 
         pcursor=cr;
-        String question=cr.child("name").getValue().toString();
+        final String question=cr.child("name").getValue().toString();
+        final String option_type=cr.child("option_type").getValue().toString();
         ArrayList<Option> opts=new ArrayList<>();
         int i=0;
 
 
 
-        Log.d(TAG, "inflate: ques "+question);
+       // Log.d(TAG, "inflate: ques "+question);
 
         ques.setText(question);
 
@@ -127,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             op.cr=ds.child(dsa.child("next").getValue().toString());
 
             opts.add(op);
-            Log.d(TAG, "inflate: option "+i +"->"+op.name+" next "+op.cr.getKey());
+          //  Log.d(TAG, "inflate: option "+i +"->"+op.name+" next "+op.cr.getKey());
             i++;
 
         }
@@ -140,11 +187,13 @@ public class MainActivity extends AppCompatActivity {
             ck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    isReady=true;
                      final int childCount = options.getChildCount();
                     for (int i = 0; i < childCount; i++) {
 
                         CheckBox v =(CheckBox) options.getChildAt(i);
-                        v.setChecked(false);
+                        if(option_type.equals("single_check"))
+                            v.setChecked(false);
 
 
                         ck.setChecked(true);
